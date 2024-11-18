@@ -87,10 +87,14 @@ func WithContactAddress(addr string) PhishingServerOption {
 // Overwrite net.https Error with a custom one to set our own headers
 // Go's internal Error func returns text/plain so browser's won't render the html
 func customError(w http.ResponseWriter, error string, code int) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Header().Set("X-Content-Type-Options", "nosniff")
-	w.WriteHeader(code)
-	fmt.Fprintln(w, error)
+        w.Header().Set("Content-Type", "text/html; charset=utf-8")
+        w.Header().Set("X-Content-Type-Options", "nosniff")
+        w.Header().Set("X-XSS-Protection", "1; mode=block")
+        w.Header().Set("X-Frame-Options", "SAMEORIGIN")
+        w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'")
+        w.Header().Set("Server", "Apache/2.4.51 (Unix)")
+        w.WriteHeader(code)
+        fmt.Fprintln(w, error)
 }
 
 // Overwrite go's internal not found to allow templating the not found page
